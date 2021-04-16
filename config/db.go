@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/go-pg/pg/v10"
@@ -14,7 +15,7 @@ var ZoomToken string
 func SetupDb() (*pg.DB, error) {
 	err := godotenv.Load()
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
 	}
 	PgUrl = os.Getenv("DB_URL")
 	ZoomToken = os.Getenv("ZOOM_TOKEN")
