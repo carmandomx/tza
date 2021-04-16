@@ -4,18 +4,18 @@ info:
   version: "1.0.0"
   title: "Tracking Zoom Assistance"
 
-host: "localhost:8080"
+host: "tracking-zoom-attendance.herokuapp.com"
 basePath: "/v1"
 tags:
 - name: "meetings"
   description: "Get a zoom meeting and their past instances"
 - name: "participants"
   description: "Get all the participants of a given meeting instance"
-- name: "token"
-  description: "Change zoom auth token in real time"
+- name: "utils"
+  description: "Change zoom auth token in real time and run cronjob"
 schemes:
-- "https"
 - "http"
+- "https"
 paths:
 
   /meetings/{id}:
@@ -35,12 +35,12 @@ paths:
           type: integer
           required: true
           description: Numeric ID of meeting to get
-      responses: 
+      responses:
         "200":
           description: "Succesful operation"
           schema: {
-    "$ref": "#/definitions/Meeting"
-}
+      "$ref": "#/definitions/Meeting"
+    }
         "400":
           description: "Invalid id"
           
@@ -61,12 +61,12 @@ paths:
           type: integer
           required: true
           description: Numeric ID of meeting to get instances
-      responses: 
+      responses:
         "200":
           description: "Succesful operation"
           schema: {
-    "$ref": "#/definitions/ResultInstances"
-}
+      "$ref": "#/definitions/ResultInstances"
+    }
         "400":
           description: "Invalid id"
           
@@ -87,34 +87,53 @@ paths:
           type: string
           required: true
           description: UUID of meeting instance to get participants
-        responses: 
+        responses:
           "200":
             description: "Succesful operation"
             schema: {
-    "$ref": "#/definitions/MeetingAndParticipants"
-}
+              "$ref": "#/definitions/MeetingAndParticipants"
+              }
           "400":
             description: "Invalid id"
   /token:
       post:
         tags:
-          - "token"
+          - "utils"
         summary: "Modify zoom token without having to reload app"
         description: ""
         operationId: "SetToken"
         parameters:
-        - in: body
-          name: body
-          required: true
-          description: Payload
-          schema:
+            - in: body
+              required: true
+              name: body
+              schema:
                 $ref: '#/definitions/Token'
-              
-        responses: 
+        responses:
           "200":
             description: "Succesful operation"
           "400":
             description: "Duplicated token"
+            
+  /cronjob:
+      post:
+        tags:
+          - "utils"
+        summary: "Run cronjob to update db"
+        description: ""
+        operationId: "SpinCronJob"
+
+        parameters:
+            - in: body
+              name: body
+              required: true
+              schema:
+                type: "object"
+        responses:
+          "200":
+            description: "Task ran succesfully"
+          "409":
+            description: "Erro while trying to update db"
+        
     
 definitions:
   Meeting:
@@ -198,3 +217,5 @@ definitions:
     properties:
       token:
         type: "string"
+      
+

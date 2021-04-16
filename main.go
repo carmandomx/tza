@@ -36,7 +36,7 @@ func main() {
 	mtngs.GET("/:id/instances", meetings.FetchAllMeetingInstances(DB))
 	p.GET("/:participantId", meetings.FetchParticipant(DB))
 	v1.POST("/token", meetings.SetToken)
-	v1.GET("/cronjob", meetings.SpinCronJob(DB))
+	v1.POST("/cronjob", meetings.SpinCronJob(DB))
 	r.Static("/swaggerui", "./swaggerui")
 	r.Run()
 }

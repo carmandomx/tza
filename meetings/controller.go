@@ -164,12 +164,12 @@ func SpinCronJob(db *pg.DB) gin.HandlerFunc {
 	fn := func(c *gin.Context) {
 		err := CronJob(db)
 		if err != nil {
-			c.JSON(http.StatusNotModified, gin.H{
+			c.JSON(http.StatusConflict, gin.H{
 				"message": err,
 			})
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusNoContent, gin.H{
 			"message": "Task ran succesfully",
 		})
 	}
