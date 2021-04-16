@@ -160,6 +160,23 @@ func FetchParticipant(db *pg.DB) gin.HandlerFunc {
 	return gin.HandlerFunc(fn)
 }
 
+func SpinCronJob(db *pg.DB) gin.HandlerFunc {
+	fn := func(c *gin.Context) {
+		err := CronJob(db)
+		if err != nil {
+			c.JSON(http.StatusNotModified, gin.H{
+				"message": err,
+			})
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Task ran succesfully",
+		})
+	}
+
+	return gin.HandlerFunc(fn)
+}
+
 func RequestParticipants(meetingId string) []MeetingAndParticipants {
 	token := os.Getenv("ZOOM_TOKEN")
 	baseUrl := os.Getenv("BASE_URL")
@@ -252,7 +269,7 @@ func GetAllClassMeetings() []Group {
 	return result.Results
 }
 
-func CronJob(db *pg.DB) {
+func CronJob(db *pg.DB) error {
 	meetingIds := GetAllClassMeetings()
 
 	participants := make([][]MeetingAndParticipants, 20)
@@ -271,10 +288,12 @@ func CronJob(db *pg.DB) {
 				if ok && pgErr.IntegrityViolation() {
 					fmt.Println("Participant already exists:", err)
 				} else if pgErr.Field('S') == "PANIC" {
-					panic(err)
+					return err
 				}
 			}
 		}
 
 	}
+
+	return nil
 }
