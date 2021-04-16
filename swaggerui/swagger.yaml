@@ -1,0 +1,200 @@
+swagger: "2.0"
+info:
+  description: ""
+  version: "1.0.0"
+  title: "Tracking Zoom Assistance"
+
+host: "localhost:8080"
+basePath: "/v1"
+tags:
+- name: "meetings"
+  description: "Get a zoom meeting and their past instances"
+- name: "participants"
+  description: "Get all the participants of a given meeting instance"
+- name: "token"
+  description: "Change zoom auth token in real time"
+schemes:
+- "https"
+- "http"
+paths:
+
+  /meetings/{id}:
+    get:
+      tags:
+      - "meetings"
+      summary: "Find meeting by id"
+      description: ""
+      operationId: "GetMeeting"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Numeric ID of meeting to get
+      responses: 
+        "200":
+          description: "Succesful operation"
+          schema: {
+    "$ref": "#/definitions/Meeting"
+}
+        "400":
+          description: "Invalid id"
+          
+  /meetings/{id}/instances:
+    get:
+      tags:
+      - "meetings"
+      summary: "Find all instances of provided id"
+      description: ""
+      operationId: "FetchAllMeetingInstances"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: path
+          name: id
+          type: integer
+          required: true
+          description: Numeric ID of meeting to get instances
+      responses: 
+        "200":
+          description: "Succesful operation"
+          schema: {
+    "$ref": "#/definitions/ResultInstances"
+}
+        "400":
+          description: "Invalid id"
+          
+  /participants/{uuid}:
+      get:
+        tags:
+          - "participants"
+        summary: "Find all particicpants of a given instance"
+        description: ""
+        operationId: "FetchParticipant"
+        consumes:
+          - "application/json"
+        produces:
+          - "application/json"
+        parameters:
+        - in: path
+          name: uuid
+          type: string
+          required: true
+          description: UUID of meeting instance to get participants
+        responses: 
+          "200":
+            description: "Succesful operation"
+            schema: {
+    "$ref": "#/definitions/MeetingAndParticipants"
+}
+          "400":
+            description: "Invalid id"
+  /token:
+      post:
+        tags:
+          - "token"
+        summary: "Modify zoom token without having to reload app"
+        description: ""
+        operationId: "SetToken"
+        parameters:
+        - in: body
+          name: body
+          required: true
+          description: Payload
+          schema:
+                $ref: '#/definitions/Token'
+              
+        responses: 
+          "200":
+            description: "Succesful operation"
+          "400":
+            description: "Duplicated token"
+    
+definitions:
+  Meeting:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      uuid:
+        type: "string"
+        format: "uuid"
+      host_id:
+        type: "integer"
+        
+      type:
+        type: "integer"
+        
+      topic:
+        type: "string"
+      user_name:
+        type: "string"
+      user_email:
+        type: "string"
+      start_time:
+        type: "string"
+        format: "date"
+      end_time:
+        type: "string"
+        format: "date"
+      duration:
+        type: "integer"
+      total_minutes:
+        type: "integer"
+      participants_count:
+        type: "integer"
+  MeetingInstance:
+    type: "object"
+    properties:
+      meeting_id:
+        type: "integer"
+      start_time:
+        type: "string"
+        format: "date"
+      uuid:
+        type: "string"
+  ResultInstances:
+    type: "object"
+    properties:
+      results:
+        type: "array"
+        items:
+          allOf:
+            - $ref: '#/definitions/MeetingInstance'
+  MeetingAndParticipants:
+    type: "object"
+    properties:
+      instance_id:
+        type: "string"
+        format: "uuid"
+      start_time:
+        type: "string"
+        format: "date"
+      participants:
+        type: "array"
+        items:
+          allOf:
+            - $ref: '#/definitions/Participant'
+  Participant:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      name:
+        type: "string"
+      user_email:
+        type: "string"
+        format: "email"
+  Token:
+    type: "object"
+    properties:
+      token:
+        type: "string"
